@@ -1,4 +1,6 @@
 import { Scene, GameObjects } from 'phaser';
+import { GAME_HEIGHT, GAME_WIDTH } from '../constants';
+import { isMobileDevice } from '../utils/device';
 
 export class MainMenu extends Scene
 {
@@ -14,9 +16,9 @@ export class MainMenu extends Scene
     {
         console.log('MainMenu scene created');
         
-        // Use the game's base resolution (1024x768) for positioning
-        const gameWidth = 1024;
-        const gameHeight = 768;
+        // Use the game's base resolution for positioning
+        const gameWidth = GAME_WIDTH;
+        const gameHeight = GAME_HEIGHT;
         const centerX = gameWidth / 2;
         const centerY = gameHeight / 2;
         
@@ -78,7 +80,7 @@ export class MainMenu extends Scene
         }).setOrigin(0.5);
 
         // Add touch control preview only on mobile devices
-        if (this.isMobileDevice()) {
+        if (isMobileDevice()) {
             console.log('Mobile device detected, showing touch controls preview');
             this.createTouchControlPreview();
         } else {
@@ -93,7 +95,7 @@ export class MainMenu extends Scene
         const touchZoneSize = 120; // Appropriate for 1024x768 resolution
         const deadZoneSize = 30;
         const touchZoneX = 100; // From left edge
-        const touchZoneY = 668; // From top (768 - 100)
+        const touchZoneY = GAME_HEIGHT - 100; // From top
         
         console.log('Creating touch controls at:', touchZoneX, touchZoneY);
         
@@ -112,30 +114,6 @@ export class MainMenu extends Scene
         }).setOrigin(0.5);
         
         this.touchControls.add([touchZoneBg, deadZoneBg, labelText]);
-    }
-
-    private isMobileDevice(): boolean {
-        // Check for mobile devices using user agent and device characteristics
-        const userAgent = navigator.userAgent.toLowerCase();
-        const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-        
-        // Also check for touch and small screen size (typical mobile characteristics)
-        const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        const isSmallScreen = window.innerWidth <= 768 || window.innerHeight <= 1024;
-        
-        // Consider it mobile if it matches mobile user agent OR (has touch AND small screen)
-        const isMobile = isMobileUA || (hasTouch && isSmallScreen);
-        
-        console.log('Device detection:', {
-            userAgent: userAgent.substring(0, 50) + '...',
-            isMobileUA,
-            hasTouch,
-            isSmallScreen,
-            screenSize: `${window.innerWidth}x${window.innerHeight}`,
-            finalDecision: isMobile
-        });
-        
-        return isMobile;
     }
 
 }
