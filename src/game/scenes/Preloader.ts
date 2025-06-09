@@ -11,20 +11,28 @@ export class Preloader extends Scene
     {
         console.log('Preloader scene initialized');
         
+        // Use the game's base resolution for positioning
+        const gameWidth = 1024;
+        const gameHeight = 768;
+        const centerX = gameWidth / 2;
+        const centerY = gameHeight / 2;
+        
         //  We loaded this image in our Boot Scene, so we can display it here
-        this.add.image(512, 384, 'background');
+        this.add.image(centerX, centerY, 'background');
 
         //  A simple progress bar. This is the outline of the bar.
-        this.add.rectangle(512, 384, 468, 32).setStrokeStyle(1, 0xffffff);
+        const barWidth = 400;
+        const barHeight = 24;
+        this.add.rectangle(centerX, centerY, barWidth, barHeight).setStrokeStyle(1, 0xffffff);
 
         //  This is the progress bar itself. It will increase in size from the left based on the % of progress.
-        const bar = this.add.rectangle(512-230, 384, 4, 28, 0xffffff);
+        const bar = this.add.rectangle(centerX - barWidth/2, centerY, 4, barHeight - 4, 0xffffff);
 
         //  Use the 'progress' event emitted by the LoaderPlugin to update the loading bar
         this.load.on('progress', (progress: number) => {
             console.log('Loading progress:', progress);
             //  Update the progress bar (our bar is 464px wide, so 100% = 464px)
-            bar.width = 4 + (460 * progress);
+            bar.width = 4 + ((barWidth - 8) * progress);
         });
     }
 

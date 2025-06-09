@@ -9,8 +9,8 @@ import { Preloader } from './scenes/Preloader';
 //  https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
-    width: 3072,
-    height: 1920,
+    width: 1024,
+    height: 768,
     parent: 'game-container',
     backgroundColor: '#028af8',
     render: {
@@ -19,17 +19,17 @@ const config: Phaser.Types.Core.GameConfig = {
         roundPixels: true
     },
     scale: {
-        mode: Scale.RESIZE,
+        mode: Scale.FIT,
         autoCenter: Scale.CENTER_BOTH,
-        width: '100%',
-        height: '100%',
+        width: 1024,
+        height: 768,
         min: {
-            width: 1024,
-            height: 768
+            width: 320,
+            height: 240
         },
         max: {
-            width: 3072,
-            height: 1920
+            width: 2048,
+            height: 1536
         }
     },
     physics: {
@@ -45,9 +45,14 @@ const config: Phaser.Types.Core.GameConfig = {
         MainMenu,
         MainGame,
         GameComplete
-    ]
+    ],
+    dom: {
+        createContainer: true
+    }
 };
 
 export default function StartGame(containerId: string) {
-    return new Game({ ...config, parent: containerId });
+    const game = new Game({ ...config, parent: containerId });
+    game.canvas.style.cursor = 'none';
+    return game;
 }
