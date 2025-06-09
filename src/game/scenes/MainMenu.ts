@@ -2,10 +2,7 @@ import { Scene, GameObjects } from 'phaser';
 
 export class MainMenu extends Scene
 {
-    private background!: GameObjects.Image;
-    private title!: GameObjects.Text;
     private startButton!: GameObjects.Text;
-    private instructions!: GameObjects.Text;
     private touchControls!: Phaser.GameObjects.Container;
 
     constructor ()
@@ -30,7 +27,7 @@ export class MainMenu extends Scene
             .setOrigin(0.5);
 
         // Create title - positioned in upper portion
-        this.title = this.add.text(centerX, centerY - 200, 'Little Broomstick Tales', {
+        this.add.text(centerX, centerY - 200, 'Little Broomstick Tales', {
             fontFamily: 'Arial Black',
             fontSize: '48px',
             color: '#ffffff',
@@ -70,8 +67,8 @@ export class MainMenu extends Scene
             this.scene.start('Game');
         });
 
-        // Create instructions - positioned in lower portion  
-        this.instructions = this.add.text(centerX, centerY + 150, 'Use arrow keys to move\nthe little witch cat around the forest!', {
+        // Create instructions - positioned in lower portion
+        this.add.text(centerX, centerY + 150, 'Use arrow keys to move\nthe little witch cat around the forest!', {
             fontFamily: 'Arial',
             fontSize: '24px',
             color: '#ffffff',
@@ -141,9 +138,4 @@ export class MainMenu extends Scene
         return isMobile;
     }
 
-    private resize(gameSize: { width: number; height: number }) {
-        // With Scale.FIT mode, we don't need to handle resize manually
-        // The game will automatically scale to fit the screen
-        console.log('Game resized to:', gameSize.width, 'x', gameSize.height);
-    }
 }

@@ -6,7 +6,6 @@ export class Game extends Scene
     private decorLayer!: Phaser.Tilemaps.TilemapLayer;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private moveSpeed: number = 200; // Flying speed
-    private camera!: Phaser.Cameras.Scene2D.Camera;
     private idleTimer: number = 0;
     private readonly SLEEPY_THRESHOLD: number = 15000; // 15 seconds in ms
     
@@ -35,7 +34,6 @@ export class Game extends Scene
             console.error('Camera not found');
             return;
         }
-        this.camera = camera;
 
         // Create tilemap with appropriate scaling for 1024x768 resolution
         const map = this.make.tilemap({ key: 'forest-map' });
@@ -212,7 +210,7 @@ export class Game extends Scene
         return isMobile;
     }
 
-    update(time: number, delta: number) {
+    update(_time: number, delta: number) {
         if (!this.player.body) {
             console.error('Player body not found');
             return;
