@@ -1,16 +1,6 @@
-# Phaser Vite TypeScript Template
+# Little Broomstick Tales
 
-This is a Phaser 3 project template that uses Vite for bundling. It supports hot-reloading for quick development workflow, includes TypeScript support and scripts to generate production-ready builds.
-
-**[This Template is also available as a JavaScript version.](https://github.com/phaserjs/template-vite)**
-
-### Versions
-
-This template has been updated for:
-
-- [Phaser 3.90.0](https://github.com/phaserjs/phaser)
-- [Vite 6.3.1](https://github.com/vitejs/vite)
-- [TypeScript 5.7.2](https://github.com/microsoft/TypeScript)
+Little Broomstick Tales is a tiny Phaser 3 game I'm building for my daughter. It uses the Phaser Vite TypeScript template under the hood, so all of the usual `npm` commands still work. The game lets you guide a little witch cat around a forest using either the keyboard or touch controls.
 
 ![screenshot](screenshot.png)
 
@@ -36,24 +26,19 @@ The local development server runs on `http://localhost:8080` by default. Please 
 
 Once the server is running you can edit any of the files in the `src` folder. Vite will automatically recompile your code and then reload the browser.
 
-## Template Project Structure
-
-We have provided a default project structure to get you started. This is as follows:
-
-## Template Project Structure
+## Project Structure
 
 We have provided a default project structure to get you started:
 
-| Path                         | Description                                                |
+| Path | Description |
 |------------------------------|------------------------------------------------------------|
-| `index.html`                 | A basic HTML page to contain the game.                     |
-| `public/assets`              | Game sprites, audio, etc. Served directly at runtime.      |
-| `public/style.css`           | Global layout styles.                                      |
-| `src/main.ts`                | Application bootstrap.                                     |
-| `src/game`                   | Folder containing the game code.                           |
-| `src/game/main.ts`           | Game entry point: configures and starts the game.          |
-| `src/game/scenes`            | Folder with all Phaser game scenes.                        | 
-
+| `index.html` | A basic HTML page to contain the game. |
+| `public/assets` | Game sprites, audio, etc. Served directly at runtime. |
+| `public/style.css` | Global layout styles. |
+| `src/main.ts` | Application bootstrap. |
+| `src/game` | Folder containing the game code. |
+| `src/game/main.ts` | Game entry point: configures and starts the game. |
+| `src/game/scenes` | Folder with all Phaser game scenes. |
 
 ## Handling Assets
 
@@ -156,3 +141,4 @@ Created by [Phaser Studio](mailto:support@phaser.io). Powered by coffee, anime, 
 The Phaser logo and characters are &copy; 2011 - 2025 Phaser Studio Inc.
 
 All rights reserved.
+
