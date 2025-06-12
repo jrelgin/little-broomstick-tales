@@ -28,17 +28,20 @@ Once the server is running you can edit any of the files in the `src` folder. Vi
 
 ## Project Structure
 
-We have provided a default project structure to get you started:
+The codebase is organized so that all of the reusable game logic lives under
+`src/game`:
 
 | Path | Description |
-|------------------------------|------------------------------------------------------------|
+|-------------------------------|----------------------------------------------------------------|
 | `index.html` | A basic HTML page to contain the game. |
 | `public/assets` | Game sprites, audio, etc. Served directly at runtime. |
 | `public/style.css` | Global layout styles. |
 | `src/main.ts` | Application bootstrap. |
-| `src/game` | Folder containing the game code. |
-| `src/game/main.ts` | Game entry point: configures and starts the game. |
-| `src/game/scenes` | Folder with all Phaser game scenes. |
+| `src/game/main.ts` | Phaser game configuration and start-up. |
+| `src/game/constants.ts` | Central game resolution and other constants. |
+| `src/game/utils` | Shared helpers such as mobile detection. |
+| `src/game/objects` | Reusable GameObjects like `TouchControls`. |
+| `src/game/scenes` | All Phaser scenes (`Boot`, `Preloader`, `MainMenu`, etc.). |
 
 ## Handling Assets
 

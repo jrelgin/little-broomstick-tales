@@ -1,4 +1,9 @@
 import { Scene } from 'phaser';
+import {
+    GAME_HEIGHT
+} from '../constants';
+import { isMobileDevice } from '../utils/device';
+import TouchControls from '../objects/TouchControls';
 
 export class Game extends Scene
 {
@@ -10,11 +15,7 @@ export class Game extends Scene
     private readonly SLEEPY_THRESHOLD: number = 15000; // 15 seconds in ms
     
     // Touch control properties
-    private touchControls!: Phaser.GameObjects.Container;
-    private touchZone!: Phaser.GameObjects.Zone;
-    private readonly DEAD_ZONE_SIZE: number = 40; // Dead zone in the center
-    private isTouching: boolean = false;
-    private touchDirection: { x: number, y: number } = { x: 0, y: 0 };
+    private touchControls?: TouchControls;
 
     constructor ()
     {
@@ -96,9 +97,12 @@ export class Game extends Scene
         this.cursors = this.input.keyboard!.createCursorKeys();
         
         // Create touch controls only on mobile devices
-        if (this.isMobileDevice()) {
+        if (isMobileDevice()) {
             console.log('Mobile device detected, creating functional touch controls');
-            this.createTouchControls();
+            const size = 120;
+            const x = size / 2 + 20;
+            const y = GAME_HEIGHT - size / 2 - 20;
+            this.touchControls = new TouchControls(this, x, y, size);
         } else {
             console.log('Desktop device detected, no touch controls needed');
         }
@@ -110,105 +114,6 @@ export class Game extends Scene
         console.log('Flying witch game setup complete');
     }
 
-    private createTouchControls() {
-        // Create a container for touch controls
-        this.touchControls = this.add.container(0, 0);
-        
-        // Position relative to base game resolution (1024x768)
-        const touchZoneSize = 120; // Appropriate size for 1024x768
-        const deadZoneSize = 30;
-        const touchZoneX = touchZoneSize / 2 + 20; // From left edge
-        const touchZoneY = 768 - touchZoneSize / 2 - 20; // From bottom edge (768 - offset)
-        
-        console.log('Creating touch controls in Game scene at:', touchZoneX, touchZoneY);
-        
-        // Create the touch zone
-        this.touchZone = this.add.zone(touchZoneX, touchZoneY, touchZoneSize, touchZoneSize)
-            .setInteractive()
-            .setOrigin(0.5)
-            .setScrollFactor(0); // Keep fixed on screen
-            
-        // Add visual indicators
-        const touchZoneBg = this.add.circle(touchZoneX, touchZoneY, touchZoneSize / 2, 0x000000, 0.4)
-            .setScrollFactor(0);
-        const deadZoneBg = this.add.circle(touchZoneX, touchZoneY, deadZoneSize / 2, 0x000000, 0.7)
-            .setScrollFactor(0);
-        
-        // Add to container
-        this.touchControls.add([touchZoneBg, deadZoneBg, this.touchZone]);
-        this.touchControls.setScrollFactor(0);
-        
-        // Set up touch events
-        this.touchZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            console.log('Touch started at:', pointer.x, pointer.y);
-            this.isTouching = true;
-            this.updateTouchDirection(pointer);
-        });
-        
-        this.touchZone.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-            if (this.isTouching) {
-                this.updateTouchDirection(pointer);
-            }
-        });
-        
-        this.touchZone.on('pointerup', () => {
-            console.log('Touch ended');
-            this.isTouching = false;
-            this.touchDirection = { x: 0, y: 0 };
-        });
-        
-        this.touchZone.on('pointerout', () => {
-            console.log('Touch left zone');
-            this.isTouching = false;
-            this.touchDirection = { x: 0, y: 0 };
-        });
-    }
-    
-    private updateTouchDirection(pointer: Phaser.Input.Pointer) {
-        const touchZoneX = this.touchZone.x;
-        const touchZoneY = this.touchZone.y;
-        
-        // Calculate distance from center
-        const dx = pointer.x - touchZoneX;
-        const dy = pointer.y - touchZoneY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        // If within dead zone, no movement
-        if (distance < this.DEAD_ZONE_SIZE / 2) {
-            this.touchDirection = { x: 0, y: 0 };
-            return;
-        }
-        
-        // Normalize direction
-        const normalizedX = dx / distance;
-        const normalizedY = dy / distance;
-        
-        this.touchDirection = { x: normalizedX, y: normalizedY };
-    }
-
-    private isMobileDevice(): boolean {
-        // Check for mobile devices using user agent and device characteristics
-        const userAgent = navigator.userAgent.toLowerCase();
-        const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-        
-        // Also check for touch and small screen size (typical mobile characteristics)
-        const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        const isSmallScreen = window.innerWidth <= 768 || window.innerHeight <= 1024;
-        
-        // Consider it mobile if it matches mobile user agent OR (has touch AND small screen)
-        const isMobile = isMobileUA || (hasTouch && isSmallScreen);
-        
-        console.log('Game scene device detection:', {
-            userAgent: userAgent.substring(0, 50) + '...',
-            isMobileUA,
-            hasTouch,
-            isSmallScreen,
-            screenSize: `${window.innerWidth}x${window.innerHeight}`,
-            finalDecision: isMobile
-        });
-        
-        return isMobile;
-    }
 
     update(_time: number, delta: number) {
         if (!this.player.body) {
@@ -229,8 +134,8 @@ export class Game extends Scene
         let isMoving = false;
         
         // Handle touch controls (only if they exist on mobile devices)
-        if (this.isTouching && this.touchDirection) {
-            const { x, y } = this.touchDirection;
+        if (this.touchControls?.isActive) {
+            const { x, y } = this.touchControls.direction;
             if (Math.abs(x) > Math.abs(y)) {
                 // Horizontal movement
                 if (x < 0) {
