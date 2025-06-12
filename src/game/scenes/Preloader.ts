@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+import { GAME_HEIGHT, GAME_WIDTH } from '../constants';
 
 export class Preloader extends Scene
 {
@@ -12,8 +13,8 @@ export class Preloader extends Scene
         console.log('Preloader scene initialized');
         
         // Use the game's base resolution for positioning
-        const gameWidth = 1024;
-        const gameHeight = 768;
+        const gameWidth = GAME_WIDTH;
+        const gameHeight = GAME_HEIGHT;
         const centerX = gameWidth / 2;
         const centerY = gameHeight / 2;
         
