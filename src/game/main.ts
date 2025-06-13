@@ -13,6 +13,9 @@ import {
     MIN_WIDTH
 } from './constants';
 
+// Debug: Check if constants are loaded correctly
+console.log('Game constants:', { GAME_WIDTH, GAME_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MAX_WIDTH, MAX_HEIGHT });
+
 //  Find out more information about the Game Config at:
 //  https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
 const config: Phaser.Types.Core.GameConfig = {
