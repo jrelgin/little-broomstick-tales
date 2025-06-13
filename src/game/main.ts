@@ -40,6 +40,9 @@ const config: Phaser.Types.Core.GameConfig = {
             height: MAX_HEIGHT
         }
     },
+    input: {
+        gamepad: true
+    },
     physics: {
         default: 'arcade',
         arcade: {
