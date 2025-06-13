@@ -64,9 +64,8 @@ export class Preloader extends Scene
         this.load.tilemapTiledJSON('forest-map', 'maps/forest-map..tmj');
         this.load.image('forest-tileset', 'tilesets/grasstileset-premium.png');
 
-        // Load other game assets
-        this.load.image('platform', 'platform.png');
-        this.load.image('background', 'background.png');
+        // Note: platform and background assets are created programmatically in createTemporaryAssets()
+        // No need to load them from files since they don't exist in the assets folder
     }
 
     create ()

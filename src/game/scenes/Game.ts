@@ -2,7 +2,7 @@ import { Scene } from 'phaser';
 import {
     GAME_HEIGHT
 } from '../constants';
-import { isMobileDevice } from '../utils/device';
+import { isMobileDevice, hasHardwareInput } from '../utils/device';
 import TouchControls from '../objects/TouchControls';
 
 export class Game extends Scene
@@ -100,30 +100,34 @@ export class Game extends Scene
         this.cursors = this.input.keyboard!.createCursorKeys();
 
         // Listen for gamepad connections
-        this.input.gamepad.once('connected', (pad: Phaser.Input.Gamepad.Gamepad) => {
-            console.log('Gamepad connected:', pad.id);
-            this.gamepad = pad;
-        });
+        if (this.input.gamepad) {
+            this.input.gamepad.once('connected', (pad: Phaser.Input.Gamepad.Gamepad) => {
+                console.log('Gamepad connected:', pad.id);
+                this.gamepad = pad;
+            });
 
-        this.input.gamepad.on('disconnected', (pad: Phaser.Input.Gamepad.Gamepad) => {
-            if (this.gamepad && this.gamepad === pad) {
-                console.log('Gamepad disconnected');
-                this.gamepad = undefined;
+            this.input.gamepad.on('disconnected', (pad: Phaser.Input.Gamepad.Gamepad) => {
+                if (this.gamepad && this.gamepad === pad) {
+                    console.log('Gamepad disconnected');
+                    this.gamepad = undefined;
+                }
+            });
+
+            if (this.input.gamepad.total > 0) {
+                this.gamepad = this.input.gamepad.gamepads[0];
+                console.log('Using already connected gamepad:', this.gamepad?.id);
             }
-        });
-
-        if (this.input.gamepad.total > 0) {
-            this.gamepad = this.input.gamepad.gamepads[0];
-            console.log('Using already connected gamepad:', this.gamepad.id);
         }
         
-        // Create touch controls only on mobile devices
-        if (isMobileDevice()) {
-            console.log('Mobile device detected, creating functional touch controls');
+        // Create touch controls only on mobile devices AND when no hardware input is available
+        if (isMobileDevice() && !hasHardwareInput()) {
+            console.log('Mobile device detected with no hardware input, creating touch controls');
             const size = 120;
             const x = size / 2 + 20;
             const y = GAME_HEIGHT - size / 2 - 20;
             this.touchControls = new TouchControls(this, x, y, size);
+        } else if (isMobileDevice() && hasHardwareInput()) {
+            console.log('Mobile device detected with hardware input available, skipping touch controls');
         } else {
             console.log('Desktop device detected, no touch controls needed');
         }
@@ -142,22 +146,55 @@ export class Game extends Scene
             return;
         }
 
+        // Refresh gamepad reference if needed (gamepads can become active after scene creation)
+        if (!this.gamepad && this.input.gamepad && this.input.gamepad.total > 0) {
+            this.gamepad = this.input.gamepad.gamepads[0];
+        }
+
         // Handle four-directional flying movement
         let left = this.cursors.left.isDown;
         let right = this.cursors.right.isDown;
         let up = this.cursors.up.isDown;
         let down = this.cursors.down.isDown;
 
+        // Handle gamepad input
         if (this.gamepad) {
             const pad = this.gamepad;
             const threshold = 0.1;
-            const axisH = pad.axes.length > 0 ? pad.axes[0].getValue() : 0;
-            const axisV = pad.axes.length > 1 ? pad.axes[1].getValue() : 0;
 
-            left = left || pad.left || axisH < -threshold;
-            right = right || pad.right || axisH > threshold;
-            up = up || pad.up || axisV < -threshold;
-            down = down || pad.down || axisV > threshold;
+            // Use Phaser's built-in stick properties first (most reliable)
+            let stickLeft = false, stickRight = false, stickUp = false, stickDown = false;
+            
+            if (pad.leftStick) {
+                stickLeft = pad.leftStick.x < -threshold;
+                stickRight = pad.leftStick.x > threshold;
+                stickUp = pad.leftStick.y < -threshold;
+                stickDown = pad.leftStick.y > threshold;
+            }
+
+            // Fallback: Check all axes for controllers with different mappings (like 8BitDo)
+            if (!stickLeft && !stickRight && !stickUp && !stickDown) {
+                for (let i = 0; i < pad.axes.length; i++) {
+                    const axisValue = pad.axes[i].getValue();
+                    if (Math.abs(axisValue) > threshold) {
+                        // Check if this is a horizontal axis (even indices often are)
+                        if (i % 2 === 0) {
+                            stickLeft = axisValue < -threshold;
+                            stickRight = axisValue > threshold;
+                        } else {
+                            // Odd indices are often vertical
+                            stickUp = axisValue < -threshold;
+                            stickDown = axisValue > threshold;
+                        }
+                    }
+                }
+            }
+
+            // Combine with d-pad and keyboard input
+            left = left || pad.left || stickLeft;
+            right = right || pad.right || stickRight;
+            up = up || pad.up || stickUp;
+            down = down || pad.down || stickDown;
         }
 
         // Reset velocity
@@ -166,8 +203,26 @@ export class Game extends Scene
         // Handle movement and play correct animation
         let isMoving = false;
         
-        // Handle touch controls (only if they exist on mobile devices)
-        if (this.touchControls?.isActive) {
+        // PRIORITY 1: Hardware input (keyboard/gamepad) - always preferred when available
+        if (left) {
+            this.player.setVelocityX(-this.moveSpeed);
+            this.player.play('walk-left', true);
+            isMoving = true;
+        } else if (right) {
+            this.player.setVelocityX(this.moveSpeed);
+            this.player.play('walk-right', true);
+            isMoving = true;
+        } else if (up) {
+            this.player.setVelocityY(-this.moveSpeed);
+            this.player.play('walk-up', true);
+            isMoving = true;
+        } else if (down) {
+            this.player.setVelocityY(this.moveSpeed);
+            this.player.play('walk-down', true);
+            isMoving = true;
+        }
+        // PRIORITY 2: Touch controls (only if no hardware input is being used)
+        else if (this.touchControls?.isActive) {
             const { x, y } = this.touchControls.direction;
             if (Math.abs(x) > Math.abs(y)) {
                 // Horizontal movement
@@ -188,24 +243,6 @@ export class Game extends Scene
                     this.player.play('walk-down', true);
                 }
             }
-            isMoving = true;
-        }
-        // Handle keyboard controls
-        else if (left) {
-            this.player.setVelocityX(-this.moveSpeed);
-            this.player.play('walk-left', true);
-            isMoving = true;
-        } else if (right) {
-            this.player.setVelocityX(this.moveSpeed);
-            this.player.play('walk-right', true);
-            isMoving = true;
-        } else if (up) {
-            this.player.setVelocityY(-this.moveSpeed);
-            this.player.play('walk-up', true);
-            isMoving = true;
-        } else if (down) {
-            this.player.setVelocityY(this.moveSpeed);
-            this.player.play('walk-down', true);
             isMoving = true;
         }
 
