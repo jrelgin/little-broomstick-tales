@@ -1,6 +1,6 @@
 # Little Broomstick Tales
 
-Little Broomstick Tales is a tiny Phaser 3 game I'm building for my daughter. It uses the Phaser Vite TypeScript template under the hood, so all of the usual `npm` commands still work. The game lets you guide a little witch cat around a forest using either the keyboard or touch controls.
+Little Broomstick Tales is a tiny Phaser 3 game I'm building for my daughter. It uses the Phaser Vite TypeScript template under the hood, so all of the usual `npm` commands still work. The game lets you guide a little witch cat around a forest using the keyboard, a gamepad, or touch controls.
 
 ![screenshot](screenshot.png)
 
